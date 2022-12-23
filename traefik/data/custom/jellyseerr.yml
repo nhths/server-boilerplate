@@ -1,0 +1,25 @@
+http:
+ #region routers 
+  routers:
+    jellyseerr:
+      entryPoints:
+        - "web"
+        - "web-secure"
+      rule: "Host(`example.com`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certResolver: letsEncrypt
+      service: jellyseerr
+
+#endregion
+#region services
+  services:
+    jellyseerr:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.31.000:5055"
+        passHostHeader: true
+    
+#endregion

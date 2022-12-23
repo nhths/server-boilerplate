@@ -1,0 +1,28 @@
+http:
+  routers:
+    nextcloud:
+      entryPoints:
+        - "web"
+        - "web-secure"
+      rule: "Host(`example.com`)"
+      middlewares:
+        - nextcloud-headers
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certResolver: letsEncrypt
+      service: nextcloud
+  
+  middlewares:
+    nextcloud-headers:
+      headers:
+        sslRedirect: true
+        referrerPolicy: same-origin
+        X-Robots-Tag: none
+
+  services:
+    nextcloud:
+      loadBalancer:
+        servers:
+          - url: "https://192.168.31.000"
+        passHostHeader: true

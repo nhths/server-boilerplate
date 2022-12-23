@@ -1,0 +1,171 @@
+version: '3'
+
+services:
+  sonarr:
+    image: linuxserver/sonarr:latest
+    container_name: sonarr
+    volumes:
+      - ./sonarr/config:/config
+#important use one mount for downloads and media (for hardlinks)
+      - /MediaPool:/files
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=002
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+    
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    volumes:
+      - ./radarr/config:/config
+#important use one mount for downloads and media (for hardlinks)
+      - /MediaPool:/files
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=002
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+    
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=002
+      - TZ=Russia/Moscow
+    volumes:
+      - ./lidarr/config:/config
+#important use one mount for downloads and media (for hardlinks)
+      - /MediaPool:/files
+    ports:
+      - 8686:8686
+    restart: unless-stopped
+    
+  readarr:
+    image: lscr.io/linuxserver/readarr:develop
+    container_name: readarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=002
+      - TZ=Russia/Moscow
+    volumes:
+      - ./readarr/config:/config
+#important use one mount for downloads and media (for hardlinks)
+      - /MediaPool:/files
+    ports:
+      - 8787:8787
+    restart: unless-stopped
+    
+  qbittorrent:
+    image: linuxserver/qbittorrent
+    container_name: qbittorrent
+    environment:
+      - WEBUI_PORT=8068
+      - PUID=1000
+      - PGID=1000
+      - UMASK=002
+    volumes:
+      - ./qbittorrent:/config
+      - /MediaPool:/files
+    ports:
+      - 6881:6881
+      - 6881:6881/udp
+      - 8068:8068
+    restart: unless-stopped
+    
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    container_name: jackett
+    volumes:
+      - ./jackett:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=002
+    ports:
+      - 9117:9117
+    restart: unless-stopped
+    
+  jackett-sync:
+    image: m00nwatcher/jackett-sync
+    container_name: jackett-sync
+    environment:
+      URL: http://192.168.31.000:9117
+      APIKEY: t79kabk7030x1itzm51z6gw09tn0f7ir
+      # ALTURL: http://jackett:9117 # If running with network_mode: host, like in ./docker/docker-compose.yml
+      SONARR_URL: http://192.168.31.000:8989
+      SONARR_KEY: a4714e2e057d4b8f95d20e4aeb7cab47
+      RADARR_URL: http://192.168.31.000:7878
+      RADARR_KEY: 0bed900faca34d4191b610a6e4ba2e19
+      LIDARR_URL: http://192.168.31.000:8686
+      LIDARR_KEY: 45a84f9bfa4e40118c635f71be2ff154
+    
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
+      - TZ=Russia/Moscow
+    ports:
+      - 8191:8191
+    restart: unless-stopped 
+    
+  torproxy:
+    restart: unless-stopped
+    image: dperson/torproxy:latest
+    container_name: torproxy
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - RUN_OPTS=--ProxyConnection=torproxy:8118
+    ports:
+      - 8118:8118
+      - 9050:9050
+    
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - LOG_LEVEL=info
+      - TZ=Russia/Moscow
+    ports:
+      - 5055:5055
+    volumes:
+      - ./jellyseerr/config:/app/config
+    restart: unless-stopped
+    
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+#    user: uid:gid
+    network_mode: "host"
+    volumes:
+      - ./jellyfin/config:/config
+      - /MediaPool/apps/jellyfin/metadata:/metadata
+      - /MediaPool/apps/jellyfin/cache:/cache
+      - /MediaPool/media:/media
+    restart: "unless-stopped"
+    # Optional - alternative address used for autodiscovery
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=002
+      - JELLYFIN_PublishedServerUrl=https://example.com
+    ports:
+      - 8096:8096
+      - 8920:8920 #optional
+      - 7359:7359/udp #optional
+      - 1900:1900/udp #optional
+#    devices:
+#      - /dev/dri:/dev/dri

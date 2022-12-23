@@ -1,0 +1,40 @@
+http:
+ #region routers 
+  routers:
+    gitlab:
+      entryPoints:
+        - "web"
+        - "web-secure"
+      rule: "Host(`example.com`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certResolver: letsEncrypt
+      service: gitlab
+
+#endregion
+#region services
+  services:
+    gitlab:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.31.000"
+        passHostHeader: true
+    
+#endregion
+
+tcp:
+  routers:
+    gitlab-mail:
+      entryPoints:
+        - "mail"
+      rule: "HostSNI(`example.com`)"
+      tls: {}
+      service: gitlab-mail
+
+  services:
+    gitlab-mail:
+      loadBalancer:
+        servers:
+          - address: "192.168.31.000:25"

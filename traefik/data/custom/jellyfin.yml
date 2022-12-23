@@ -1,0 +1,25 @@
+http:
+ #region routers 
+  routers:
+    jellyfin:
+      entryPoints:
+        - "web"
+        - "web-secure"
+      rule: "Host(`example.com`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certResolver: letsEncrypt
+      service: jellyfin
+
+#endregion
+#region services
+  services:
+    jellyfin:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.31.000:8096"
+        passHostHeader: true
+    
+#endregion

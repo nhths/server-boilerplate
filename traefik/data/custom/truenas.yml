@@ -1,0 +1,25 @@
+http:
+ #region routers 
+  routers:
+    truenas:
+      entryPoints:
+        - "web"
+        - "web-secure"
+      rule: "Host(`example.com`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certResolver: letsEncrypt
+      service: truenas
+
+#endregion
+#region services
+  services:
+    truenas:
+      loadBalancer:
+        servers:
+          - url: "https://192.168.31.000"
+        passHostHeader: true
+    
+#endregion

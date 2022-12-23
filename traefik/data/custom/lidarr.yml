@@ -1,0 +1,25 @@
+http:
+ #region routers 
+  routers:
+    lidarr:
+      entryPoints:
+        - "web"
+        - "web-secure"
+      rule: "Host(`example.com`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certResolver: letsEncrypt
+      service: lidarr
+
+#endregion
+#region services
+  services:
+    lidarr:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.31.000:8686"
+        passHostHeader: true
+    
+#endregion

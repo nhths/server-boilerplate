@@ -1,0 +1,25 @@
+http:
+ #region routers 
+  routers:
+    portainer:
+      entryPoints:
+        - "web"
+        - "web-secure"
+      rule: "Host(`example.com`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certResolver: letsEncrypt
+      service: portainer
+
+#endregion
+#region services
+  services:
+    portainer:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.31.000:9000"
+        passHostHeader: true
+    
+#endregion

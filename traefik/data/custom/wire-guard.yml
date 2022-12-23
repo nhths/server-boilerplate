@@ -1,0 +1,42 @@
+http:
+ #region routers 
+  routers:
+    wire-guard:
+      entryPoints:
+        - "web"
+        - "web-secure"
+      rule: "Host(`example.com`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certResolver: letsEncrypt
+      service: wire-guard
+
+#endregion
+#region services
+#wire guard control panel
+  services:
+    wire-guard:
+      loadBalancer:
+        servers:
+        #wg-portal url
+          - url: "http://192.168.31.000:8080"
+        passHostHeader: true
+    
+#endregion
+
+#wire guard vpn network
+udp:
+  routers:
+    wire-guard-udp:
+      entryPoints:
+        - "wireguard-vpn"
+      rule: "Host(`example.com`)"
+      tls: {}
+      service: wire-guard-udp
+  services:
+    wire-guard-udp:
+      loadBalancer:
+        servers:
+          - address: "192.168.31.000:51820"

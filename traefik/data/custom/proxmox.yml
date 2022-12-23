@@ -1,0 +1,25 @@
+http:
+ #region routers 
+  routers:
+    proxmox:
+      entryPoints:
+        - "web"
+        - "web-secure"
+      rule: "Host(`example.com`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certResolver: letsEncrypt
+      service: proxmox
+
+#endregion
+#region services
+  services:
+    proxmox:
+      loadBalancer:
+        servers:
+          - url: "https://192.168.31.000:8006"
+        passHostHeader: true
+    
+#endregion

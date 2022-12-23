@@ -1,0 +1,25 @@
+http:
+ #region routers 
+  routers:
+    radarr:
+      entryPoints:
+        - "web"
+        - "web-secure"
+      rule: "Host(`example.com`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certResolver: letsEncrypt
+      service: radarr
+
+#endregion
+#region services
+  services:
+    radarr:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.31.000:7878"
+        passHostHeader: true
+    
+#endregion
